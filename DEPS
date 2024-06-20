@@ -26,7 +26,7 @@ vars = {
 deps = {
   # avp module
   'src/base':
-    'https://github.com/yoofa/base.git@3f69082763375f50f401a19416cb3945ba21311b',
+    'https://github.com/yoofa/base.git@9398ac1',
   'src/common':
     'https://github.com/yoofa/media_common.git@28f186f35d78a75a32069cfe03bb5cecf1ec3c4c',
 
