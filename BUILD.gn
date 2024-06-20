@@ -13,7 +13,7 @@ group("default") {
   }
 }
 
-oc_library("project") {
+ave_library("project") {
   testonly = true
   sources = []
 

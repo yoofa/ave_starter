@@ -1,0 +1,58 @@
+import("//build/config/ui.gni")
+import("//project.gni")
+if (is_android) {
+  import("//build/config/android/rules.gni")
+}
+
+group("test") {
+  testonly = true
+
+  deps = [ ":test_support" ]
+
+  deps += [ ":gtest_demo" ]
+}
+
+config("test_main_direct_config") {
+  visibility = [ ":*" ]
+  defines = [ "UNIT_TEST" ]
+}
+
+source_set("test_support") {
+  visibility = [ "*" ]
+  testonly = true
+
+  all_dependent_configs = [
+    "//third_party/googletest:gmock_config",
+    "//third_party/googletest:gtest_config",
+  ]
+
+  sources = [
+    "gmock.h",
+    "gtest.h",
+  ]
+
+  public_configs = [ ":test_main_direct_config" ]
+  deps = [
+    "//base:ignore_wundef",
+    "//testing/gmock",
+    "//testing/gtest",
+  ]
+}
+
+static_library("test_main") {
+  testonly = true
+  sources = [
+    "test_main.cc",
+    "test_main_lib.cc",
+    "test_main_lib.h",
+  ]
+  deps = [ ":test_support" ]
+}
+
+executable("gtest_demo") {
+  testonly = true
+
+  sources = [ "gtest_demo.cpp" ]
+
+  deps = [ ":test_support" ]
+}
