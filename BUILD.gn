@@ -1,0 +1,24 @@
+import("project.gni")
+
+group("default") {
+  testonly = true
+  deps = [ ":project" ]
+
+  #  deps += [ "examples" ]
+  if (ave_include_test) {
+    deps += [
+      "base:base_unittests",
+      "test",
+    ]
+  }
+}
+
+oc_library("project") {
+  testonly = true
+  sources = []
+
+  defines = []
+  deps = []
+
+  deps += [ "//base" ]
+}
