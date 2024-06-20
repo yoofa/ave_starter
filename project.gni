@@ -7,3 +7,6 @@ import("//build/config/ui.gni")
 import("//build_overrides/build.gni")
 
 import("//base/build/ave.gni")
+
+
+ave_include_test = true
