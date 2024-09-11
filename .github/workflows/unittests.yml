@@ -32,7 +32,11 @@ jobs:
           EOF
 
       - name: print info
-        run: id;echo $PATH; which glient; which gn; ls /setup;
+        run: |
+            id
+            echo $PATH
+            cat /home/builduser/.bashrc
+            ls /setup/
 
       - name: Download code with gclient
         working-directory: /home/builduser/code
