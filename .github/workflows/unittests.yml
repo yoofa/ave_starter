@@ -1,0 +1,50 @@
+name: C++ Build and Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container: ghcr.io/yoofa/ave-build:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create code directory
+        run: mkdir code
+
+      - name: Create and write gclient file
+        working-directory: code
+        run: |
+          cat << EOF > .gclient
+          solutions = [
+            { "name"        : 'src',
+              "url"         : 'git@github.com:yoofa/base-test-project.git',
+              "deps_file"   : 'DEPS',
+              "managed"     : False,
+              "custom_deps" : {
+              },
+              "custom_vars": {},
+            },
+          ]
+          EOF
+
+      - name: Download code with gclient
+        working-directory: code
+        run: gclient sync
+
+      - name: Configure build
+        working-directory: code/src
+        run: gn gen out/Default
+
+      - name: Build project
+        working-directory: code/src
+        run: ninja -C out/Default
+
+      - name: Run unit tests
+        working-directory: code/src
+        run: ./out/Default/base_unittests
