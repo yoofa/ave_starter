@@ -12,10 +12,11 @@ jobs:
 
     steps:
       - name: Create code directory
+        working-directory: /home/builduser/
         run: mkdir code
 
       - name: Create and write gclient file
-        working-directory: code
+        working-directory: /home/builduser/code
         run: |
           cat << EOF > .gclient
           solutions = [
@@ -31,17 +32,17 @@ jobs:
           EOF
 
       - name: Download code with gclient
-        working-directory: code
+        working-directory: /home/builduser/code
         run: gclient sync
 
       - name: Configure build
-        working-directory: code/src
+        working-directory: /home/builduser/code/src
         run: gn gen out/Default
 
       - name: Build project
-        working-directory: code/src
+        working-directory: /home/builduser/code/src
         run: ninja -C out/Default
 
       - name: Run unit tests
-        working-directory: code/src
+        working-directory: /home/builduser/code/src
         run: ./out/Default/base_unittests
