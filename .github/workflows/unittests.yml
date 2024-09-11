@@ -13,7 +13,9 @@ jobs:
     steps:
       - name: Create code directory
         working-directory: /home/builduser/
-        run: mkdir code
+        run: |
+            source ~/.bashrc
+            mkdir code
 
       - name: Create and write gclient file
         working-directory: /home/builduser/code
