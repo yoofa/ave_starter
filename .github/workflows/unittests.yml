@@ -11,9 +11,6 @@ jobs:
     container: ghcr.io/yoofa/ave-build:latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Create code directory
         run: mkdir code
 
