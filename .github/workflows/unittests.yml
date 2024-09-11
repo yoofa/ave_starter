@@ -3,7 +3,7 @@ name: C++ Build and Test
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build-and-test:
@@ -30,6 +30,9 @@ jobs:
             },
           ]
           EOF
+
+      - name: print id
+        run: id
 
       - name: Download code with gclient
         working-directory: /home/builduser/code
