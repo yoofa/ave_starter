@@ -15,6 +15,8 @@ jobs:
     container:
       image: ghcr.io/yoofa/ave-build:latest
       options: --user builduser
+    env:
+      PATH: /setup/depot_tools:$PATH
 
     steps:
       # 创建 base-test-project 目录
