@@ -16,12 +16,15 @@ jobs:
       image: ghcr.io/yoofa/ave-build:latest
       options: --user builduser
 
+    defaults:
+      run:
+        working-directory: /home/builduser/base-test-project
+
     steps:
       # 创建 base-test-project 目录并生成 .gclient 文件
       - name: 创建 base-test-project 目录和 .gclient 文件
         run: |
-          mkdir base-test-project
-          cd base-test-project
+          mkdir -p base-test-project
           cat <<EOF > .gclient
           solutions = [
             { "name"        : 'src',
@@ -38,18 +41,17 @@ jobs:
       # 同步代码
       - name: 运行 gclient sync
         run: |
-          cd base-test-project
           gclient sync
 
       # 编译项目
       - name: 使用 GN 和 Ninja 进行编译
         run: |
-          cd base-test-project/src
+          cd src
           gn gen out/Default
           ninja -C out/Default
 
       # 运行单元测试
       - name: 运行单元测试
         run: |
-          cd base-test-project/src/out/Default
+          cd src/out/Default
           ./base_unittests
