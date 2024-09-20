@@ -1,6 +1,7 @@
 name: 构建与测试
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -22,17 +23,17 @@ jobs:
           mkdir base-test-project
           cd base-test-project
           cat <<EOF > .gclient
-solutions = [
-  { "name"        : 'src',
-    "url"         : 'https://github.com/yoofa/base-test-project.git',
-    "deps_file"   : 'DEPS',
-    "managed"     : False,
-    "custom_deps" : {
-    },
-    "custom_vars": {},
-  },
-]
-EOF
+          solutions = [
+            { "name"        : 'src',
+              "url"         : 'https://github.com/yoofa/base-test-project.git',
+              "deps_file"   : 'DEPS',
+              "managed"     : False,
+              "custom_deps" : {
+              },
+              "custom_vars": {},
+            },
+          ]
+          EOF
 
       # 同步代码
       - name: 运行 gclient sync
