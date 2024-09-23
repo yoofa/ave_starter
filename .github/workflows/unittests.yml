@@ -1,0 +1,31 @@
+name: 编译与单元测试
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: 调用复用的 Action 进行环境安装和代码下载
+      - name: Install Environment and Download Code
+        uses: ./.github/actions/install_env_and_download_code
+        with:
+          gclient_file_path: .github/.gclient
+          install_deps_script: tools/install-deps.sh
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Step 2: 编译项目
+      - name: 编译项目
+        run: |
+          cd code/src
+          gn gen out/Default
+          ninja -C out/Default
+
+      # Step 3: 运行单元测试
+      - name: 运行单元测试
+        run: |
+          cd code/src/out/Default
+          ./base_unittests
