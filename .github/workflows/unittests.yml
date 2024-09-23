@@ -10,7 +10,7 @@ jobs:
     steps:
       # Step 1: 调用复用的 Action 进行环境安装和代码下载
       - name: Install Environment and Download Code
-        uses: yoofa/yf-actions/base-test-build-action@base-test-build-action-v1.0.2
+        uses: yoofa/yf-actions/base-test-build-action@base-test-build-action-v1.0.3
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
