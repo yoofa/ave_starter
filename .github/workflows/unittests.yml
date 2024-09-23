@@ -10,10 +10,7 @@ jobs:
     steps:
       # Step 1: 调用复用的 Action 进行环境安装和代码下载
       - name: Install Environment and Download Code
-        uses: ./.github/actions/install_env_and_download_code
-        with:
-          gclient_file_path: .github/.gclient
-          install_deps_script: tools/install-deps.sh
+        uses: yoofa/yf-actions/actions/base-test-build-action
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
