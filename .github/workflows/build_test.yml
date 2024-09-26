@@ -11,14 +11,14 @@ jobs:
     - run: cat /etc/alpine-release
     - run: touch /hello
     - run: ls /
-    
+
   build-and-test:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/yoofa/ave-build:latest
       options: "--user builduser -v ${{ github.workspace }}:/code"
-    env:
-      PATH: /setup/depot_tools:$PATH
+    #env:
+      #PATH: /setup/depot_tools:$PATH
     steps:
       - name: Print Info
         run: |
