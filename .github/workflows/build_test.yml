@@ -15,11 +15,13 @@ jobs:
     steps:
       # Step1: sync full code
       - name: gclient sync full code
+        shell: bash
         run: |
           gclient sync
 
       # Step2: build code
       - name: 使用 GN 和 Ninja 进行编译
+        shell: bash
         run: |
           gn gen out/Default
           ninja -C out/Default
