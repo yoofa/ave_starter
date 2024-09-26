@@ -5,8 +5,6 @@ on:
 jobs:
   debug-ls:
     runs-on: ubuntu-latest
-  build-and-test:
-    runs-on: ubuntu-latest
     steps:
       # Step0: check repo
       - name: Check out the repo
@@ -16,7 +14,8 @@ jobs:
         run: |
           which git
           ls -alh
-
+  build-and-test:
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/yoofa/ave-build:latest
     #env:
