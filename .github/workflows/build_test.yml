@@ -14,6 +14,7 @@ jobs:
       # Step1: ls
       - name: list .
         run: |
+          which git
           ls -alh
 
     container:
@@ -42,6 +43,7 @@ jobs:
         run: |
           ls -alh
           echo $PATH
+          which git
           which gclient
           gclient sync
 
