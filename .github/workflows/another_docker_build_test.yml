@@ -1,0 +1,25 @@
+name: Another Docker Build Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step1: check repo
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      # Step2: build with docker
+      - name: gclient sync full code
+        uses: addnab/docker-run-action@v3
+          with:
+            image: ghcr.io/yoofa/ave-build:latest
+            options: -v ${{ github.workspace }}:/code --user builduser
+            run: |
+                cd /code
+                gclient sync
+                gn gen out/Default
+                ninja -C out/Default
+                ./out/Default/base_unittests
