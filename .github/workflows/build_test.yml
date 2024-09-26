@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/yoofa/ave-build:latest
-      options: "--user builduser"
     #env:
       #PATH: /setup/depot_tools:$PATH
     steps:
