@@ -1,8 +1,18 @@
+# project ignore
 /base
 /build
 /buildtools
 /common
+/media
 /out
 /testing
 /third_party
 /tools
+
+
+
+# for gclient files isnore
+.cipd
+.gclient_*
+
+
