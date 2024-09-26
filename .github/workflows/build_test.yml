@@ -1,9 +1,15 @@
-name: 构建与测试
-
+name: Docker build
 on:
   workflow_dispatch:
 
 jobs:
+  check-code:
+    runs-on: ubuntu-latest
+  steps:
+    # Step0: check repo
+    - name: Check out the repo
+      uses: actions/checkout@v2
+
   build-and-test:
     runs-on: ubuntu-latest
     container:
@@ -12,11 +18,6 @@ jobs:
     env:
       PATH: /setup/depot_tools:$PATH
 
-    steps:
-      # Step0: check repo
-      - name: Check out the repo
-        uses: actions/checkout@v2
-        
       # Step1: sync full code
       - name: gclient sync full code
         shell: bash
