@@ -11,6 +11,13 @@ jobs:
     env:
       PATH: /setup/depot_tools:$PATH
     steps:
+      - name: Print Info
+        run: |
+          pwd
+          id
+          echo $PATH
+          which gclient
+          ls /setup
       # Step0: check repo
       - name: Check out the repo
         uses: actions/checkout@v3
