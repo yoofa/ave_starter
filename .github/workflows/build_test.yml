@@ -9,7 +9,7 @@ jobs:
     container:
       image: ghcr.io/yoofa/ave-build:latest
       options: --user builduser
-      env:
+    env:
       PATH: /setup/depot_tools:$PATH
 
     steps:
