@@ -14,6 +14,7 @@ jobs:
         run: |
           which git
           ls -alh
+          git show
   build-and-test:
     runs-on: ubuntu-latest
     container:
@@ -43,6 +44,7 @@ jobs:
           ls -alh
           echo $PATH
           which git
+          git show
           which gclient
           gclient sync
 
