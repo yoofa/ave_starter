@@ -3,11 +3,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  debyg:
+    runs-on: ubuntu-latest
+    container: { image: alpine }
+    steps:  
+    - run: uname -a
+    - run: cat /etc/alpine-release
+    - run: touch /hello
+    - run: ls /
+    
   build-and-test:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/yoofa/ave-build:latest
-      options: --user builduser
+      options: "--user builduser -v ${{ github.workspace }}:/code"
     env:
       PATH: /setup/depot_tools:$PATH
     steps:
