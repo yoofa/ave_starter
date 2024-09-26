@@ -16,12 +16,13 @@ jobs:
           pwd
           echo "ls ."
           ls .
-          echo "ls /"
-          ls /
           id
           echo $PATH
           which gclient
           ls /setup
+          echo "ls /"
+          ls /
+
       # Step0: check repo
       - name: Check out the repo
         uses: actions/checkout@v3
