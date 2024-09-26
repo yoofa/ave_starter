@@ -3,8 +3,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  debug-ls:
+    runs-on: ubuntu-latest
   build-and-test:
     runs-on: ubuntu-latest
+    steps:
+      # Step0: check repo
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      # Step1: ls
+      - name: list .
+        run: |
+          ls -alh
+
     container:
       image: ghcr.io/yoofa/ave-build:latest
     #env:
@@ -29,6 +40,7 @@ jobs:
       # Step1: sync full code
       - name: gclient sync full code
         run: |
+          ls -alh
           echo $PATH
           which gclient
           gclient sync
