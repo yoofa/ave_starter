@@ -1,28 +1,33 @@
-name: 编译与单元测试
+name: Unit Test
 
 on:
   workflow_dispatch:
 
+
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    container:
+      image: ghcr.io/yoofa/ave-build:latest
     steps:
-      # Step 1: 调用复用的 Action 进行环境安装和代码下载
-      - name: Install Environment and Download Code
-        uses: yoofa/yf-actions/base-test-build-action@base-test-build-action-v1.0.5
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      # Step0: check repo
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
-      # Step 2: 编译项目
-      - name: 编译项目
+      # Step1: sync full code
+      - name: gclient sync full code
         run: |
-          cd code/src
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          gclient sync
+
+      # Step2: build code
+      - name: build code with ninja
+        run: |
           gn gen out/Default
           ninja -C out/Default
 
-      # Step 3: 运行单元测试
-      - name: 运行单元测试
+      # Step3: run unit test
+      - name: run unit test
         run: |
-          cd code/src/out/Default
-          ./base_unittests
+          ./out/Default/base_unittests
