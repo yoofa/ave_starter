@@ -15,6 +15,6 @@
 
 AVE_PUSH_IGNORING_WUNDEF()
 #include "testing/gmock/include/gmock/gmock.h"
-AVE_POP_IGNORING_WUNDEF()
+            AVE_POP_IGNORING_WUNDEF()
 
 #endif  // TEST_GMOCK_H_
