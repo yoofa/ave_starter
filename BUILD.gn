@@ -3,6 +3,7 @@ import("project.gni")
 group("default") {
   testonly = true
   deps = [ ":project" ]
+  deps += [ "//base/tracing" ]
 
   #  deps += [ "examples" ]
   if (ave_include_test) {
