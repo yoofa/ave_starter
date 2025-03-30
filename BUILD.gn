@@ -8,6 +8,7 @@ group("default") {
   if (ave_include_test) {
     deps += [
       "base:base_unittests",
+      "media:media_unittests",
       "test",
     ]
   }
