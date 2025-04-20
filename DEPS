@@ -36,9 +36,9 @@ deps = {
 
   # chromium 
   'build':
-    'https://chromium.googlesource.com/chromium/src/build@5bce81deee6d30ac58c45f6cd53e859c62780687',
+    'https://chromium.googlesource.com/chromium/src/build@05874e6c9429039f1747034af61de1fe2ea1ed06',
   'buildtools':
-    'https://chromium.googlesource.com/chromium/src/buildtools@94d7b86a83537f8a7db7dccb0bf885739f7a81aa',
+    'https://chromium.googlesource.com/chromium/src/buildtools@db0eae9640184fb132061f248f6108771a6ea2d4',
   'buildtools/linux64': {
     'packages': [
       {
@@ -83,7 +83,7 @@ deps = {
   },
 
   'testing':
-    'https://chromium.googlesource.com/chromium/src/testing@074ff55a07fb690e769eda906375f8e7cb6b39b8',
+    'https://chromium.googlesource.com/chromium/src/testing@eac4c18f749488d7232af275405e0e1b67d84cb3',
   'third_party/depot_tools':
     'https://chromium.googlesource.com/chromium/tools/depot_tools.git@f1c7c96958b849668e62799e74b204c9fe9fe17c',
 
