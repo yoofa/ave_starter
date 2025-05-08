@@ -112,6 +112,14 @@ deps = {
     'url': 'https://chromium.googlesource.com/external/github.com/google/benchmark.git@344117638c8ff7e239044fd0fa7085839fc03021',
   },
 
+  'third_party/perfetto':
+    'https://android.googlesource.com/platform/external/perfetto.git@e57316a6ae4e85e9bc8ba82a6c6a93eb5d9a72aa',
+ 'third_party/jsoncpp/source':
+    'https://chromium.googlesource.com/external/github.com/open-source-parsers/jsoncpp.git@42e892d96e47b1f6e29844cc705e148ec4856448', # from svn 248
+  'third_party/protobuf-javascript/src':
+    'https://chromium.googlesource.com/external/github.com/protocolbuffers/protobuf-javascript' + '@' + 'e34549db516f8712f678fcd4bc411613b5cc5295',
+
+
   ### android
   'third_party/jdk/current': {
       'packages': [

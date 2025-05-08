@@ -26,6 +26,9 @@ default_args = {
 
   # ave
   enable_ave_tracing = true
+  ave_use_perfetto = false
+
+  is_clang = true
 
   #  ffmpeg_branding = "Chrome"
   libyuv_use_absl_flags = false
