@@ -52,8 +52,9 @@ declare_args() {
   # purposes. In any case, it doesn't depend on //third_party/perfetto which
   # is used for base tracing, so this feature is disabled.
   enable_base_tracing = false
-  use_perfetto_client_library = false
-  use_perfetto_trace_processor = false
+
+  perfetto_build_with_embedder = true
+  enable_perfetto_trace_processor = true
 
   # Limits the defined //third_party/android_deps targets to only "buildCompile"
   # and "buildCompileNoDeps" targets. This is useful for third-party

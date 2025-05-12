@@ -12,6 +12,20 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      # Step0.1: cache
+      - name: Cache gclient dependencies
+        id: gclient-cache
+        uses: actions/cache@v4
+        with:
+          # !!! 非常重要：这里需要填写 gclient sync 后存放依赖的实际目录 !!!
+          path: |
+            tools
+            third_party
+          key: ${{ runner.os }}-gclient-ave-${{ hashFiles('.gclient', 'DEPS') }} # 使用 OS 和配置文件哈希作为 key
+          # 'DEPS' 可能需要根据你的 .gclient 配置和实际 DEPS 文件位置调整
+          restore-keys: |
+            ${{ runner.os }}-gclient-ave- # 可选：提供一个更通用的恢复 key
+
       # Step1: sync full code
       - name: gclient sync full code
         run: |
