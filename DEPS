@@ -20,6 +20,8 @@ vars = {
 
   'buildtools_gn_version': 'git_revision:ed1abc107815210dc66ec439542bee2f6cbabc00',
 
+  'buildtools_gn_version': 'git_revision:b2afae122eeb6ce09c52d63f67dc53fc517dbdc8',
+
   # ninja CIPD package version
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'ninja_version': 'version:2@1.11.1.chromium.6',
@@ -81,10 +83,11 @@ deps = {
     # Reclient doesn't have linux-arm64 package.
     'condition': 'not (host_os == "linux" and host_cpu == "arm64")',
   },
-
+ 
   'testing':
     'https://chromium.googlesource.com/chromium/src/testing@63412fdcdfe281e6b9531a5e1086a59c0b9e6909',
 
+  #
   'tools/clang/dsymutil': {
     'packages': [
       {
@@ -100,9 +103,6 @@ deps = {
     'https://chromium.googlesource.com/chromium/src/tools@6820cc03cc8a4b1fb99747f30e8249d138a70981',
   #'tools/swarming_client':
   #  'https://chromium.googlesource.com/infra/luci/client-py.git@d46ea7635f2911208268170512cb611412488fd8',
-
-  'third_party/depot_tools':
-    'https://chromium.googlesource.com/chromium/tools/depot_tools.git@80d1969422e75e8e9eecafa46074074b289e2568',
 }
 
 hooks = [
