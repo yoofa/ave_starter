@@ -16,7 +16,9 @@ vars = {
   'generate_location_tags': True,
 
   # reclient CIPD package version
-  'reclient_version': 're_client_version:0.113.0.8b45b89-gomaip',
+  'reclient_version': 're_client_version:0.176.0.8c46330a-gomaip',
+
+  'buildtools_gn_version': 'git_revision:ed1abc107815210dc66ec439542bee2f6cbabc00',
 
   'buildtools_gn_version': 'git_revision:b2afae122eeb6ce09c52d63f67dc53fc517dbdc8',
 
@@ -36,9 +38,9 @@ deps = {
 
   # chromium 
   'build':
-    'https://chromium.googlesource.com/chromium/src/build@05874e6c9429039f1747034af61de1fe2ea1ed06',
+    'https://chromium.googlesource.com/chromium/src/build@64e296c42a93fbd27acc9a94713e4289273409b2',
   'buildtools':
-    'https://chromium.googlesource.com/chromium/src/buildtools@db0eae9640184fb132061f248f6108771a6ea2d4',
+    'https://chromium.googlesource.com/chromium/src/buildtools@a660247d3c14a172b74b8e832ba1066b30183c97',
   'buildtools/linux64': {
     'packages': [
       {
@@ -63,7 +65,7 @@ deps = {
     'packages': [
       {
         'package': 'gn/gn/windows-amd64',
-        'version': 'git_revision:',
+        'version': Var('buildtools_gn_version'),
       }
     ],
     'dep_type': 'cipd',
@@ -81,11 +83,9 @@ deps = {
     # Reclient doesn't have linux-arm64 package.
     'condition': 'not (host_os == "linux" and host_cpu == "arm64")',
   },
-
+ 
   'testing':
-    'https://chromium.googlesource.com/chromium/src/testing@eac4c18f749488d7232af275405e0e1b67d84cb3',
-  'third_party/depot_tools':
-    'https://chromium.googlesource.com/chromium/tools/depot_tools.git@f1c7c96958b849668e62799e74b204c9fe9fe17c',
+    'https://chromium.googlesource.com/chromium/src/testing@63412fdcdfe281e6b9531a5e1086a59c0b9e6909',
 
   #
   'tools/clang/dsymutil': {
@@ -100,7 +100,7 @@ deps = {
   },
 
   'tools':
-    'https://chromium.googlesource.com/chromium/src/tools@a8fe86b922a84de686c3b15c87e2a9ac84d06db3',
+    'https://chromium.googlesource.com/chromium/src/tools@6820cc03cc8a4b1fb99747f30e8249d138a70981',
   #'tools/swarming_client':
   #  'https://chromium.googlesource.com/infra/luci/client-py.git@d46ea7635f2911208268170512cb611412488fd8',
 }
@@ -196,4 +196,8 @@ hooks = [
     'action': ['python', 'build/util/lastchange.py',                                            
                '-o', 'build/util/LASTCHANGE'],                                                  
   },
+]
+
+recursedeps = [
+  'third_party',
 ]
