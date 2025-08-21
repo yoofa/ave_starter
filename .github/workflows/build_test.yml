@@ -13,24 +13,24 @@ jobs:
         uses: actions/checkout@v3
 
       # Step0.1: cache
-      - name: Cache gclient dependencies
-        id: gclient-cache
-        uses: actions/cache@v4
-        with:
-          # !!! 非常重要：这里需要填写 gclient sync 后存放依赖的实际目录 !!!
-          path: |
-            tools
-            third_party
-          key: ${{ runner.os }}-gclient-ave-${{ hashFiles('.gclient', 'DEPS') }} # 使用 OS 和配置文件哈希作为 key
-          # 'DEPS' 可能需要根据你的 .gclient 配置和实际 DEPS 文件位置调整
-          restore-keys: |
-            ${{ runner.os }}-gclient-ave- # 可选：提供一个更通用的恢复 key
+      # - name: Cache gclient dependencies
+      #   id: gclient-cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     # !!! 非常重要：这里需要填写 gclient sync 后存放依赖的实际目录 !!!
+      #     path: |
+      #       tools
+      #       third_party
+      #     key: ${{ runner.os }}-gclient-ave-${{ hashFiles('.gclient', 'DEPS') }} # 使用 OS 和配置文件哈希作为 key
+      #     # 'DEPS' 可能需要根据你的 .gclient 配置和实际 DEPS 文件位置调整
+      #     restore-keys: |
+      #       ${{ runner.os }}-gclient-ave- # 可选：提供一个更通用的恢复 key
 
       # Step1: sync full code
       - name: gclient sync full code
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          gclient sync
+          gclient sync --shallow --no-history
 
       # Step2: build code
       - name: 使用 GN 和 Ninja 进行编译

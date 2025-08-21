@@ -21,7 +21,7 @@ jobs:
       - name: gclient sync full code
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          gclient sync
+          gclient sync --shallow --no-history
 
       # Step2: build code
       - name: build code with ninja
