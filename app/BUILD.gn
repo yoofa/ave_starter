@@ -1,0 +1,85 @@
+import("//base/build/ave.gni")
+
+group("app") {
+  deps = [
+    ":latency_measure_main",
+    ":wav_test",
+  ]
+}
+
+ave_library("latency_measure") {
+  sources = [
+    "latency_measure.cc",
+    "latency_measure.h",
+  ]
+  cflags = [
+    "-Wheader-hygiene",
+
+    # Warns when a const char[] is converted to bool.
+    "-Wstring-conversion",
+
+    "-Wtautological-overlap-compare",
+  ]
+}
+
+ave_library("async_latency_measure") {
+  sources = [
+    "async_latency_measure.cc",
+    "async_latency_measure.h",
+  ]
+  deps = [
+    ":latency_measure",
+    "//base:task_util",
+  ]
+}
+
+ave_library("simple_audio_async_player") {
+  sources = [
+    "simple_audio_async_player.cc",
+    "simple_audio_async_player.h",
+  ]
+  deps = [
+    ":latency_measure",
+    "//base:task_util",
+    "//media/audio:audio_device",
+  ]
+}
+
+ave_library("simple_audio_async_recorder") {
+  sources = [
+    "simple_audio_async_recorder.cc",
+    "simple_audio_async_recorder.h",
+  ]
+  deps = [
+    ":latency_measure",
+    "//base:task_util",
+    "//media/audio:audio_device",
+  ]
+}
+
+ave_library("measurer") {
+  sources = [
+    "measurer.cc",
+    "measurer.h",
+  ]
+  deps = [
+    ":async_latency_measure",
+    ":simple_audio_async_player",
+    ":simple_audio_async_recorder",
+    "//base:task_util",
+    "//media/audio:audio_device",
+  ]
+}
+
+ave_executable("wav_test") {
+  sources = [
+    "./dr_wav.h",
+    "./test_wav_main.cc",
+  ]
+  deps = [ ":latency_measure" ]
+}
+
+ave_executable("latency_measure_main") {
+  sources = [ "main.cc" ]
+  deps = [ ":measurer" ]
+}

@@ -8,6 +8,7 @@ group("default") {
   #  deps += [ "examples" ]
   if (ave_include_test) {
     deps += [
+      "app",
       "base:base_unittests",
       "media:media_unittests",
       "test",
