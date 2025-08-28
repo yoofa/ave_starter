@@ -12,22 +12,17 @@
 namespace ave {
 
 AsyncLatencyMeasure::AsyncLatencyMeasure(
-    ave::base::TaskRunnerFactory* task_runner_factory,
+    base::TaskRunnerFactory* task_runner_factory,
     float core_signal_freq, float core_signal_duration_ms,
     int record_sample_rate, int record_channel_count,
     float initial_peak_threshold)
-    : task_runner_(std::make_unique<ave::base::TaskRunner>(
+    : task_runner_(std::make_unique<base::TaskRunner>(
           task_runner_factory->CreateTaskRunner(
-              "AsyncLatencyMeasure", ave::base::TaskRunnerFactory::Priority::NORMAL))),
-      running_(false),
+              "AsyncLatencyMeasure", base::TaskRunnerFactory::Priority::NORMAL))),
       latency_measure_(std::make_unique<LatencyMeasure>(
           core_signal_freq, core_signal_duration_ms,
           record_sample_rate, record_channel_count,
-          initial_peak_threshold)),
-      buffer_size_(0) {
-  
-  // 预分配缓冲区
-  audio_buffer_.reserve(record_sample_rate * 2); // 2秒的缓冲区
+          initial_peak_threshold)) {
 }
 
 AsyncLatencyMeasure::~AsyncLatencyMeasure() {
@@ -49,61 +44,31 @@ void AsyncLatencyMeasure::SendFrame(const std::vector<int16_t> &frame) {
     return;
   }
 
-  // 将数据添加到缓冲区
-  {
-    // 这里可以添加线程安全保护，如果需要的话
-    audio_buffer_.insert(audio_buffer_.end(), frame.begin(), frame.end());
-    buffer_size_.store(audio_buffer_.size());
-  }
-
-  // 异步触发处理，避免阻塞调用线程
-  if (audio_buffer_.size() > static_cast<size_t>(latency_measure_->GetLatency() >= 0 ? 48000 : 4800)) {
-    task_runner_->PostTask([this]() { ProcessBufferAsync(); });
-  }
+  // 将对 LatencyMeasure 的所有访问封装到 task_runner_ 的任务中
+  task_runner_->PostTask([this, frame]() {
+    if (!running_.load()) {
+      return;
+    }
+    if (latency_measure_) {
+      latency_measure_->SendFrame(frame);
+      latest_latency_ms_.store(latency_measure_->GetLatency());
+    }
+  });
 }
 
-void AsyncLatencyMeasure::ProcessBufferAsync() {
-  if (!running_.load()) {
-    return;
-  }
-
-  // 获取当前缓冲区大小
-  size_t current_buffer_size = buffer_size_.load();
-  
-  if (current_buffer_size == 0) {
-    return;
-  }
-
-  // 创建要处理的数据副本
-  std::vector<int16_t> data_to_process;
-  {
-    // 这里可以添加线程安全保护，如果需要的话
-    data_to_process.swap(audio_buffer_);
-    buffer_size_.store(0);
-  }
-
-  // 将数据发送给LatencyMeasure进行处理
-  if (latency_measure_) {
-    latency_measure_->SendFrame(data_to_process);
-  }
-
-  // 如果还有足够的数据需要处理，继续异步处理
-  if (buffer_size_.load() > 4800 && running_.load()) {
-    task_runner_->PostTask([this]() { ProcessBufferAsync(); });
-  }
-}
+// 移除本地缓冲与分片处理，统一在 task_runner_ 线程直接驱动 LatencyMeasure
 
 float AsyncLatencyMeasure::GetLatency() const {
-  if (latency_measure_) {
-    return latency_measure_->GetLatency();
-  }
-  return -1.0f;
+  return latest_latency_ms_.load();
 }
 
 void AsyncLatencyMeasure::SetPeakThreshold(float new_threshold) {
-  if (latency_measure_) {
-    latency_measure_->SetPeakThreshold(new_threshold);
-  }
+  // 在专用线程更新阈值，避免跨线程访问
+  task_runner_->PostTask([this, new_threshold]() {
+    if (latency_measure_) {
+      latency_measure_->SetPeakThreshold(new_threshold);
+    }
+  });
 }
 
 } // namespace ave

@@ -36,7 +36,7 @@ public:
    * @param record_channel_count 录音设备的通道数
    * @param initial_peak_threshold 初始的波峰检测阈值
    */
-  AsyncLatencyMeasure(ave::base::TaskRunnerFactory* task_runner_factory,
+  AsyncLatencyMeasure(base::TaskRunnerFactory* task_runner_factory,
                       float core_signal_freq, float core_signal_duration_ms,
                       int record_sample_rate, int record_channel_count,
                       float initial_peak_threshold);
@@ -75,21 +75,15 @@ public:
   void SetPeakThreshold(float new_threshold);
 
 private:
-  /**
-   * @brief 异步处理缓冲区数据
-   */
-  void ProcessBufferAsync();
+  // 任务运行器（专用线程）
+  std::unique_ptr<base::TaskRunner> task_runner_;
+  std::atomic<bool> running_{false};
 
-  // 任务运行器
-  std::unique_ptr<ave::base::TaskRunner> task_runner_;
-  std::atomic<bool> running_;
-
-  // 被包装的LatencyMeasure实例
+  // 被包装的 LatencyMeasure 实例（仅在 task_runner_ 线程访问）
   std::unique_ptr<LatencyMeasure> latency_measure_;
 
-  // 音频数据缓冲区（用于异步处理）
-  std::vector<int16_t> audio_buffer_;
-  std::atomic<size_t> buffer_size_;
+  // 最新延迟缓存（供跨线程安全读取）
+  std::atomic<float> latest_latency_ms_{-1.0f};
 };
 
 } // namespace ave
