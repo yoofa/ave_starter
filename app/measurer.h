@@ -26,9 +26,9 @@ constexpr int32_t kRecordPlaybackSampleRate = 48000;
 constexpr int32_t kRecordPlaybackChannelCount = 2;
 
 class Measurer {
-public:
+ public:
   class Callback {
-    void OnData(const void *data, size_t size) {}
+    void OnData(const void* data, size_t size) {}
     void OnLatencyUpdate(int32_t latency_ms) {}
   };
 
@@ -44,13 +44,19 @@ public:
   void Start();
   void Stop();
 
+  // Independent control
+  void StartPlayer();
+  void StopPlayer();
+  void StartRecorder();
+  void StopRecorder();
+
   // set peak threadshold on the fly
   void SetPeakThreshold(float new_threshold);
 
   int32_t GetLatencyMs();
 
-private:
-  void ReadDataAndMeasure(); // run in task runner thread
+ private:
+  void ReadDataAndMeasure();  // run in task runner thread
 
   std::unique_ptr<base::TaskRunnerFactory> task_runner_factory_;
   std::shared_ptr<base::TaskRunner> task_runner_;
@@ -63,8 +69,9 @@ private:
   int32_t core_signal_duration_ms_;
   int32_t peak_threshold_;
   std::unique_ptr<AsyncLatencyMeasure> latency_measure_;
+  bool is_recording_ = false;
 };
 
-} // namespace ave
+}  // namespace ave
 
 #endif /* !AVE_LATENCY_MEASURE_MEASURE_H_H_ */

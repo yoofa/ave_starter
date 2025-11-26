@@ -18,15 +18,25 @@
 
 LatencyMeasure::LatencyMeasure(float core_signal_freq,
                                float core_signal_duration_ms,
-                               int record_sample_rate, int record_channel_count,
+                               int record_sample_rate,
+                               int record_channel_count,
                                float initial_peak_threshold)
     : core_signal_freq_(core_signal_freq),
       record_sample_rate_(record_sample_rate),
-      record_channel_count_(record_channel_count), total_samples_processed_(0),
+      record_channel_count_(record_channel_count),
+      total_samples_processed_(0),
       // 滤波器状态初始化
-      bpf_b0(0.0f), bpf_b1(0.0f), bpf_b2(0.0f), bpf_a1(0.0f), bpf_x1(0.0f),
-      bpf_x2(0.0f), bpf_y1(0.0f), bpf_y2(0.0f), lpf_alpha_(0.0f), lpf_y1_(0.0f),
-      peak_threshold_(initial_peak_threshold), // 初始化 atomic 变量
+      bpf_b0(0.0f),
+      bpf_b1(0.0f),
+      bpf_b2(0.0f),
+      bpf_a1(0.0f),
+      bpf_x1(0.0f),
+      bpf_x2(0.0f),
+      bpf_y1(0.0f),
+      bpf_y2(0.0f),
+      lpf_alpha_(0.0f),
+      lpf_y1_(0.0f),
+      peak_threshold_(initial_peak_threshold),  // 初始化 atomic 变量
       last_latency_ms_(-1.0f) {
   if (record_channel_count_ <= 0) {
     // 防止除以零或其他无效通道数
@@ -53,10 +63,10 @@ LatencyMeasure::LatencyMeasure(float core_signal_freq,
 }
 
 void LatencyMeasure::SetPeakThreshold(float new_threshold) {
-  peak_threshold_.store(new_threshold); // 使用 store() 来写入 atomic 变量
+  peak_threshold_.store(new_threshold);  // 使用 store() 来写入 atomic 变量
 }
 
-void LatencyMeasure::DownmixAndAppend(const std::vector<int16_t> &frame) {
+void LatencyMeasure::DownmixAndAppend(const std::vector<int16_t>& frame) {
   if (record_channel_count_ == 1) {
     // 单声道，直接添加
     audio_buffer_.insert(audio_buffer_.end(), frame.begin(), frame.end());
@@ -75,7 +85,10 @@ void LatencyMeasure::DownmixAndAppend(const std::vector<int16_t> &frame) {
 }
 
 // CHANGED: sendFrame 现在调用 downmixAndAppend
-void LatencyMeasure::SendFrame(const std::vector<int16_t> &frame) {
+void LatencyMeasure::SendFrame(const std::vector<int16_t>& frame) {
+  // dump frame to file
+  std::cout << "[Info] Received frame with " << frame.size() << " samples."
+            << std::endl;
   DownmixAndAppend(frame);
 
   // 触发处理的逻辑保持不变
@@ -85,7 +98,7 @@ void LatencyMeasure::SendFrame(const std::vector<int16_t> &frame) {
 }
 
 void LatencyMeasure::DesignBandpassFilter() {
-  float Q = 5.0f; // 对于更高频率的信号，更高的Q值有助于滤除噪声
+  float Q = 5.0f;  // 对于更高频率的信号，更高的Q值有助于滤除噪声
   float w0 = 2.0f * M_PI * core_signal_freq_ / record_sample_rate_;
   float cos_w0 = std::cos(w0);
   float sin_w0 = std::sin(w0);
@@ -110,7 +123,9 @@ float LatencyMeasure::ApplyEnvelopeLPF(float sample) {
   return lpf_y1_;
 }
 
-float LatencyMeasure::GetLatency() const { return last_latency_ms_; }
+float LatencyMeasure::GetLatency() const {
+  return last_latency_ms_;
+}
 
 // 完整的 processBuffer
 void LatencyMeasure::ProcessBuffer() {
@@ -124,7 +139,7 @@ void LatencyMeasure::ProcessBuffer() {
   }
 
   float current_threshold =
-      peak_threshold_.load(); // 使用 load() 来读取 atomic 变量
+      peak_threshold_.load();  // 使用 load() 来读取 atomic 变量
 
   std::vector<long long> candidates;
   for (size_t i = 1; i < envelope.size() - 1; ++i) {

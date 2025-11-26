@@ -16,10 +16,12 @@ namespace ave {
 namespace {
 constexpr int32_t kDefaultTestBufferMs = 5000;
 constexpr int32_t kSignalStartMs = 1000;
-constexpr int32_t kWriteChunkSizeMs = 10; // Write 10ms chunks at a time
+constexpr int32_t kWriteChunkSizeMs = 10;  // Write 10ms chunks at a time
 
-std::vector<float> generate_sine_wave(float frequency, float duration,
-                                      int32_t sample_rate, int32_t channels) {
+std::vector<float> generate_sine_wave(float frequency,
+                                      float duration,
+                                      int32_t sample_rate,
+                                      int32_t channels) {
   size_t num_samples = static_cast<size_t>(duration * sample_rate);
   std::vector<float> wave(num_samples * channels);
 
@@ -65,36 +67,39 @@ std::vector<float> generate_test_signal_f(int32_t frequency,
   return buffer;
 }
 
-std::vector<int16_t> float_to_int16(const std::vector<float> &input) {
+std::vector<int16_t> float_to_int16(const std::vector<float>& input) {
   std::vector<int16_t> output(input.size());
   for (size_t i = 0; i < input.size(); i++) {
     float sample = input[i];
-    sample = std::max(-1.0f, std::min(1.0f, sample)); // Clamp to [-1.0, 1.0]
-    output[i] = static_cast<int16_t>(sample * 32767); // Scale to int16 range
+    sample = std::max(-1.0f, std::min(1.0f, sample));  // Clamp to [-1.0, 1.0]
+    output[i] = static_cast<int16_t>(sample * 32767);  // Scale to int16 range
   }
   return output;
 }
 
 std::vector<int16_t> generate_test_signal(int32_t frequency,
-                                          int32_t duration_ms, int sample_rate,
+                                          int32_t duration_ms,
+                                          int sample_rate,
                                           int32_t channels) {
   std::vector<float> float_buffer =
       generate_test_signal_f(frequency, duration_ms, sample_rate, channels);
   return float_to_int16(float_buffer);
 }
-} // namespace
+}  // namespace
 
 SimpleAudioAsyncPlayer::SimpleAudioAsyncPlayer(
-    base::TaskRunnerFactory *task_runner_factory,
+    base::TaskRunnerFactory* task_runner_factory,
     std::shared_ptr<media::AudioDevice> audio_device)
     : task_runner_(std::make_unique<base::TaskRunner>(
           task_runner_factory->CreateTaskRunner(
-              "AudioPlayer", base::TaskRunnerFactory::Priority::HIGH))),
+              "AudioPlayer",
+              base::TaskRunnerFactory::Priority::HIGH))),
       audio_device_(std::move(audio_device)) {}
 
 SimpleAudioAsyncPlayer::~SimpleAudioAsyncPlayer() {}
 
-void SimpleAudioAsyncPlayer::Init(int32_t sample_rate, int channels,
+void SimpleAudioAsyncPlayer::Init(int32_t sample_rate,
+                                  int channels,
                                   int32_t core_signal_freq,
                                   int32_t core_signal_duration_ms) {
   task_runner_->PostTask([this, sample_rate, channels, core_signal_freq,
@@ -109,7 +114,7 @@ void SimpleAudioAsyncPlayer::Init(int32_t sample_rate, int channels,
     audio_config.channel_layout = channels == 1 ? media::CHANNEL_LAYOUT_MONO
                                                 : media::CHANNEL_LAYOUT_STEREO;
     audio_config.format = media::AUDIO_FORMAT_PCM_16_BIT;
-    audio_config.frame_size = channels * 2; // 16-bit = 2 bytes per sample
+    audio_config.frame_size = channels * 2;  // 16-bit = 2 bytes per sample
 
     audio_track_ = audio_device_->CreateAudioTrack();
     audio_track_->Open(audio_config);
@@ -155,14 +160,14 @@ void SimpleAudioAsyncPlayer::Play() {
   int32_t chunk_size_samples =
       audio_track_->sampleRate() * kWriteChunkSizeMs / 1000;
   int32_t chunk_size_bytes =
-      chunk_size_samples * audio_track_->channelCount() * 2; // 16-bit
+      chunk_size_samples * audio_track_->channelCount() * 2;  // 16-bit
 
   // Write a chunk of audio data
   if (current_position_ + chunk_size_bytes <=
       loop_buffer_.size() * sizeof(int16_t)) {
     // Write from current position
-    const uint8_t *chunk_data =
-        reinterpret_cast<const uint8_t *>(loop_buffer_.data()) +
+    const uint8_t* chunk_data =
+        reinterpret_cast<const uint8_t*>(loop_buffer_.data()) +
         current_position_;
     ssize_t written = audio_track_->Write(chunk_data, chunk_size_bytes, false);
     if (written > 0) {
@@ -171,8 +176,8 @@ void SimpleAudioAsyncPlayer::Play() {
   } else {
     // Reset to beginning and continue
     current_position_ = 0;
-    const uint8_t *chunk_data =
-        reinterpret_cast<const uint8_t *>(loop_buffer_.data());
+    const uint8_t* chunk_data =
+        reinterpret_cast<const uint8_t*>(loop_buffer_.data());
     ssize_t written = audio_track_->Write(chunk_data, chunk_size_bytes, false);
     if (written > 0) {
       current_position_ = written;
@@ -183,7 +188,7 @@ void SimpleAudioAsyncPlayer::Play() {
   task_runner_->PostTask([this]() { Play(); });
 }
 
-void SimpleAudioAsyncPlayer::Write(const uint8_t *data, size_t size) {
+void SimpleAudioAsyncPlayer::Write(const uint8_t* data, size_t size) {
   // Copy data to avoid issues with the original buffer being modified
   std::vector<uint8_t> buffer(data, data + size);
   task_runner_->PostTask([this, buffer = std::move(buffer)]() {
@@ -194,4 +199,4 @@ void SimpleAudioAsyncPlayer::Write(const uint8_t *data, size_t size) {
   });
 }
 
-} // namespace ave
+}  // namespace ave

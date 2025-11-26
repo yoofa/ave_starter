@@ -13,11 +13,12 @@
 namespace ave {
 
 SimpleAudioAsyncRecorder::SimpleAudioAsyncRecorder(
-    base::TaskRunnerFactory *task_runner_factory,
+    base::TaskRunnerFactory* task_runner_factory,
     std::shared_ptr<media::AudioDevice> audio_device)
     : task_runner_(std::make_unique<base::TaskRunner>(
           task_runner_factory->CreateTaskRunner(
-              "AudioRecorder", base::TaskRunnerFactory::Priority::HIGH))),
+              "AudioRecorder",
+              base::TaskRunnerFactory::Priority::HIGH))),
       audio_device_(std::move(audio_device)) {}
 
 SimpleAudioAsyncRecorder::~SimpleAudioAsyncRecorder() {}
@@ -30,7 +31,7 @@ void SimpleAudioAsyncRecorder::Init(int32_t sample_rate, int32_t channels) {
     audio_config.channel_layout = channels == 1 ? media::CHANNEL_LAYOUT_MONO
                                                 : media::CHANNEL_LAYOUT_STEREO;
     audio_config.format = media::AUDIO_FORMAT_PCM_16_BIT;
-    audio_config.frame_size = channels * 2; // 16-bit = 2 bytes per sample
+    audio_config.frame_size = channels * 2;  // 16-bit = 2 bytes per sample
 
     audio_record_ = audio_device_->CreateAudioRecord();
     audio_record_->Open(audio_config);
@@ -65,12 +66,12 @@ void SimpleAudioAsyncRecorder::Stop() {
   });
 }
 
-size_t SimpleAudioAsyncRecorder::Read(const void *data, size_t size) {
+size_t SimpleAudioAsyncRecorder::Read(const void* data, size_t size) {
   size_t bytes_read = 0;
   task_runner_->PostTaskAndWait([this, data, size, &bytes_read]() {
     if (audio_record_ && audio_record_->ready()) {
       ssize_t result =
-          audio_record_->Read(const_cast<void *>(data), size, false);
+          audio_record_->Read(const_cast<void*>(data), size, false);
       if (result > 0) {
         bytes_read = static_cast<size_t>(result);
       }
@@ -79,4 +80,4 @@ size_t SimpleAudioAsyncRecorder::Read(const void *data, size_t size) {
   return bytes_read;
 }
 
-} // namespace ave
+}  // namespace ave

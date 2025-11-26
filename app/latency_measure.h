@@ -9,12 +9,12 @@
 #ifndef AVE_LATENCY_MEASURE_LATENCY_MEASURE_H_H_
 #define AVE_LATENCY_MEASURE_LATENCY_MEASURE_H_H_
 
-#include <atomic> // 用于线程安全的阈值
+#include <atomic>  // 用于线程安全的阈值
 #include <cstddef>
 #include <vector>
 
 class LatencyMeasure {
-public:
+ public:
   /**
    * @brief 构造函数 (已更新)
    * @param core_signal_freq 测试信号的核心频率 (Hz)，例如 4000.0f
@@ -23,8 +23,10 @@ public:
    * @param record_channel_count 录音设备的通道数，例如 1 (单声道) 或 2 (立体声)
    * @param initial_peak_threshold 初始的波峰检测阈值 (0.0 到 1.0)
    */
-  LatencyMeasure(float core_signal_freq, float core_signal_duration_ms,
-                 int record_sample_rate, int record_channel_count,
+  LatencyMeasure(float core_signal_freq,
+                 float core_signal_duration_ms,
+                 int record_sample_rate,
+                 int record_channel_count,
                  float initial_peak_threshold);
 
   /**
@@ -32,7 +34,7 @@ public:
    * (interleaved)。 例如，立体声数据格式为 [L0, R0, L1, R1, L2, R2, ...]
    * @param frame 音频数据帧
    */
-  void SendFrame(const std::vector<int16_t> &frame);
+  void SendFrame(const std::vector<int16_t>& frame);
 
   /**
    * @brief 获取当前计算出的最新延迟
@@ -46,12 +48,12 @@ public:
    */
   void SetPeakThreshold(float new_threshold);
 
-private:
+ private:
   // ---------- 配置参数 ----------
   float core_signal_freq_;
   int record_sample_rate_;
   int record_channel_count_;
-  int min_peak_distance_; // 根据信号时长自动计算
+  int min_peak_distance_;  // 根据信号时长自动计算
 
   // ---------- 内部数据缓冲 (始终为单声道) ----------
   std::vector<float> audio_buffer_;
@@ -64,7 +66,7 @@ private:
   float lpf_y1_;
 
   // ---------- 波峰检测 ----------
-  std::atomic<float> peak_threshold_; // NEW: 使用 atomic 以确保线程安全
+  std::atomic<float> peak_threshold_;  // NEW: 使用 atomic 以确保线程安全
   std::vector<long long> peak_positions_;
 
   // ---------- 延迟结果 ----------
@@ -75,7 +77,7 @@ private:
   void ProcessBuffer();
   float ApplyBandpassFilter(float sample);
   float ApplyEnvelopeLPF(float sample);
-  void DownmixAndAppend(const std::vector<int16_t> &frame);
+  void DownmixAndAppend(const std::vector<int16_t>& frame);
 };
 
 #endif /* !AVE_LATENCY_MEASURE_LATENCY_MEASURE_H_H_ */

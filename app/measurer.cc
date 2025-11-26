@@ -11,32 +11,39 @@
 
 namespace ave {
 
-Measurer::Measurer(int32_t core_signal_freq_hz, int32_t core_signal_duration_ms,
+Measurer::Measurer(int32_t core_signal_freq_hz,
+                   int32_t core_signal_duration_ms,
                    float peak_threshold)
     : task_runner_factory_(base::CreateDefaultTaskRunnerFactory()),
       task_runner_(std::make_unique<base::TaskRunner>(
           task_runner_factory_->CreateTaskRunner(
-              "Measurer", base::TaskRunnerFactory::Priority::NORMAL))),
+              "Measurer",
+              base::TaskRunnerFactory::Priority::NORMAL))),
       audio_device_(media::AudioDevice::CreateAudioDevice()),
-      player_(std::make_unique<SimpleAudioAsyncPlayer>(
-          task_runner_factory_.get(), audio_device_)),
-      recorder_(std::make_unique<SimpleAudioAsyncRecorder>(
-          task_runner_factory_.get(), audio_device_)),
+      player_(
+          std::make_unique<SimpleAudioAsyncPlayer>(task_runner_factory_.get(),
+                                                   audio_device_)),
+      recorder_(
+          std::make_unique<SimpleAudioAsyncRecorder>(task_runner_factory_.get(),
+                                                     audio_device_)),
       core_signal_freq_hz_(core_signal_freq_hz),
       core_signal_duration_ms_(core_signal_duration_ms),
       peak_threshold_(peak_threshold),
-      latency_measure_(std::make_unique<AsyncLatencyMeasure>(
-          task_runner_factory_.get(),
-          core_signal_freq_hz_, core_signal_duration_ms,
-          kRecordPlaybackSampleRate, kRecordPlaybackChannelCount,
-          peak_threshold_)) {
+      latency_measure_(
+          std::make_unique<AsyncLatencyMeasure>(task_runner_factory_.get(),
+                                                core_signal_freq_hz_,
+                                                core_signal_duration_ms,
+                                                kRecordPlaybackSampleRate,
+                                                kRecordPlaybackChannelCount,
+                                                peak_threshold_)) {
   audio_device_->Init();
 }
 
 Measurer::~Measurer() {}
 
 void Measurer::Init(int32_t core_signal_freq_hz,
-                    int32_t core_signal_duration_ms, float peak_threshold) {
+                    int32_t core_signal_duration_ms,
+                    float peak_threshold) {
   task_runner_->PostTask(
       [this, core_signal_freq_hz, core_signal_duration_ms, peak_threshold]() {
         core_signal_freq_hz_ = core_signal_freq_hz;
@@ -44,10 +51,9 @@ void Measurer::Init(int32_t core_signal_freq_hz,
         peak_threshold_ = peak_threshold;
 
         latency_measure_ = std::make_unique<AsyncLatencyMeasure>(
-            task_runner_factory_.get(),
-            core_signal_freq_hz_, core_signal_duration_ms,
-            kRecordPlaybackSampleRate, kRecordPlaybackChannelCount,
-            peak_threshold_);
+            task_runner_factory_.get(), core_signal_freq_hz_,
+            core_signal_duration_ms, kRecordPlaybackSampleRate,
+            kRecordPlaybackChannelCount, peak_threshold_);
 
         player_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount,
                       core_signal_freq_hz_, core_signal_duration_ms_);
@@ -56,7 +62,7 @@ void Measurer::Init(int32_t core_signal_freq_hz,
 }
 
 void Measurer::Release() {
-  task_runner_->PostTask([this]() {
+  task_runner_->PostTaskAndWait([this]() {
     player_->Release();
     recorder_->Release();
     if (latency_measure_) {
@@ -67,17 +73,25 @@ void Measurer::Release() {
 }
 
 void Measurer::Start() {
+  StartPlayer();
+  StartRecorder();
+}
+
+void Measurer::StartPlayer() {
+  task_runner_->PostTask([this]() { player_->Start(); });
+}
+
+void Measurer::StartRecorder() {
   task_runner_->PostTask([this]() {
-    player_->Start();
+    if (is_recording_)
+      return;
+    is_recording_ = true;
     recorder_->Start();
-    
+
     // 启动延迟测量模块
     if (latency_measure_) {
       latency_measure_->Start();
     }
-    
-    // now player_ is playing test signal
-    // recorder_ is recording audio data
 
     // Start the measurement loop
     task_runner_->PostTask([this]() { ReadDataAndMeasure(); });
@@ -85,22 +99,29 @@ void Measurer::Start() {
 }
 
 void Measurer::Stop() {
+  StopPlayer();
+  StopRecorder();
+}
+
+void Measurer::StopPlayer() {
+  task_runner_->PostTask([this]() { player_->Stop(); });
+}
+
+void Measurer::StopRecorder() {
   task_runner_->PostTask([this]() {
-    player_->Stop();
+    is_recording_ = false;
     recorder_->Stop();
-    
+
     // 停止延迟测量模块
     if (latency_measure_) {
       latency_measure_->Stop();
     }
-    
-    // stop the loop task
   });
 }
 
 // read 10ms data each time, and send it to latency_measure_
 void Measurer::ReadDataAndMeasure() {
-  if (!latency_measure_) {
+  if (!latency_measure_ || !is_recording_) {
     return;
   }
 
@@ -108,7 +129,7 @@ void Measurer::ReadDataAndMeasure() {
   constexpr int32_t kReadChunkMs = 10;
   int32_t chunk_size_samples = kRecordPlaybackSampleRate * kReadChunkMs / 1000;
   int32_t chunk_size_bytes =
-      chunk_size_samples * kRecordPlaybackChannelCount * 2; // 16-bit
+      chunk_size_samples * kRecordPlaybackChannelCount * 2;  // 16-bit
 
   // Create buffer for reading audio data
   std::vector<int16_t> audio_buffer(chunk_size_samples *
@@ -130,7 +151,7 @@ void Measurer::ReadDataAndMeasure() {
   }
 
   // Schedule next measurement cycle (every 10ms)
-  task_runner_->PostTask([this]() { ReadDataAndMeasure(); });
+  task_runner_->PostDelayedTask([this]() { ReadDataAndMeasure(); }, 5000);
 }
 
 void Measurer::SetPeakThreshold(float new_threshold) {
@@ -150,4 +171,4 @@ int32_t Measurer::GetLatencyMs() {
   return -1;
 }
 
-} // namespace ave
+}  // namespace ave

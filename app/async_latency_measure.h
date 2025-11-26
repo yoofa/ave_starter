@@ -21,12 +21,12 @@ namespace ave {
 
 /**
  * @brief AsyncLatencyMeasure - LatencyMeasure的异步包装器
- * 
+ *
  * 这个类将LatencyMeasure包装起来，使用task runner进行异步处理，
  * 避免数据读取和处理阻塞主线程。对外接口与LatencyMeasure完全一致。
  */
 class AsyncLatencyMeasure {
-public:
+ public:
   /**
    * @brief 构造函数
    * @param task_runner_factory 任务运行器工厂
@@ -37,8 +37,10 @@ public:
    * @param initial_peak_threshold 初始的波峰检测阈值
    */
   AsyncLatencyMeasure(ave::base::TaskRunnerFactory* task_runner_factory,
-                      float core_signal_freq, float core_signal_duration_ms,
-                      int record_sample_rate, int record_channel_count,
+                      float core_signal_freq,
+                      float core_signal_duration_ms,
+                      int record_sample_rate,
+                      int record_channel_count,
                       float initial_peak_threshold);
 
   /**
@@ -60,7 +62,7 @@ public:
    * @brief 接收并处理一帧音频数据（异步）
    * @param frame 音频数据帧
    */
-  void SendFrame(const std::vector<int16_t> &frame);
+  void SendFrame(const std::vector<int16_t>& frame);
 
   /**
    * @brief 获取当前计算出的最新延迟
@@ -74,7 +76,7 @@ public:
    */
   void SetPeakThreshold(float new_threshold);
 
-private:
+ private:
   /**
    * @brief 异步处理缓冲区数据
    */
@@ -92,6 +94,6 @@ private:
   std::atomic<size_t> buffer_size_;
 };
 
-} // namespace ave
+}  // namespace ave
 
 #endif /* !AVE_LATENCY_MEASURE_ASYNC_LATENCY_MEASURE_H_H_ */

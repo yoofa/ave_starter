@@ -13,21 +13,25 @@ namespace ave {
 
 AsyncLatencyMeasure::AsyncLatencyMeasure(
     ave::base::TaskRunnerFactory* task_runner_factory,
-    float core_signal_freq, float core_signal_duration_ms,
-    int record_sample_rate, int record_channel_count,
+    float core_signal_freq,
+    float core_signal_duration_ms,
+    int record_sample_rate,
+    int record_channel_count,
     float initial_peak_threshold)
     : task_runner_(std::make_unique<ave::base::TaskRunner>(
           task_runner_factory->CreateTaskRunner(
-              "AsyncLatencyMeasure", ave::base::TaskRunnerFactory::Priority::NORMAL))),
+              "AsyncLatencyMeasure",
+              ave::base::TaskRunnerFactory::Priority::NORMAL))),
       running_(false),
-      latency_measure_(std::make_unique<LatencyMeasure>(
-          core_signal_freq, core_signal_duration_ms,
-          record_sample_rate, record_channel_count,
-          initial_peak_threshold)),
+      latency_measure_(
+          std::make_unique<LatencyMeasure>(core_signal_freq,
+                                           core_signal_duration_ms,
+                                           record_sample_rate,
+                                           record_channel_count,
+                                           initial_peak_threshold)),
       buffer_size_(0) {
-  
   // 预分配缓冲区
-  audio_buffer_.reserve(record_sample_rate * 2); // 2秒的缓冲区
+  audio_buffer_.reserve(record_sample_rate * 2);  // 2秒的缓冲区
 }
 
 AsyncLatencyMeasure::~AsyncLatencyMeasure() {
@@ -36,15 +40,17 @@ AsyncLatencyMeasure::~AsyncLatencyMeasure() {
 
 void AsyncLatencyMeasure::Start() {
   running_.store(true);
-  std::cout << "[AsyncLatencyMeasure] Started asynchronous processing" << std::endl;
+  std::cout << "[AsyncLatencyMeasure] Started asynchronous processing"
+            << std::endl;
 }
 
 void AsyncLatencyMeasure::Stop() {
   running_.store(false);
-  std::cout << "[AsyncLatencyMeasure] Stopped asynchronous processing" << std::endl;
+  std::cout << "[AsyncLatencyMeasure] Stopped asynchronous processing"
+            << std::endl;
 }
 
-void AsyncLatencyMeasure::SendFrame(const std::vector<int16_t> &frame) {
+void AsyncLatencyMeasure::SendFrame(const std::vector<int16_t>& frame) {
   if (!running_.load()) {
     return;
   }
@@ -57,19 +63,22 @@ void AsyncLatencyMeasure::SendFrame(const std::vector<int16_t> &frame) {
   }
 
   // 异步触发处理，避免阻塞调用线程
-  if (audio_buffer_.size() > static_cast<size_t>(latency_measure_->GetLatency() >= 0 ? 48000 : 4800)) {
+  if (audio_buffer_.size() >
+      static_cast<size_t>(latency_measure_->GetLatency() >= 0 ? 48000 : 4800)) {
     task_runner_->PostTask([this]() { ProcessBufferAsync(); });
   }
 }
 
 void AsyncLatencyMeasure::ProcessBufferAsync() {
+  std::cout << "[AsyncLatencyMeasure] Processing buffer asynchronously"
+            << std::endl;
   if (!running_.load()) {
     return;
   }
 
   // 获取当前缓冲区大小
   size_t current_buffer_size = buffer_size_.load();
-  
+
   if (current_buffer_size == 0) {
     return;
   }
@@ -106,4 +115,4 @@ void AsyncLatencyMeasure::SetPeakThreshold(float new_threshold) {
   }
 }
 
-} // namespace ave
+}  // namespace ave

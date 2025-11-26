@@ -83,3 +83,8 @@ ave_executable("latency_measure_main") {
   sources = [ "main.cc" ]
   deps = [ ":measurer" ]
 }
+
+ave_executable("test_independent_control") {
+  sources = [ "test_independent_control.cc" ]
+  deps = [ ":measurer" ]
+}

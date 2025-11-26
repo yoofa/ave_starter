@@ -16,19 +16,18 @@
 
 #include "latency_measure.h"
 
-void print_error_and_exit(const std::string &message) {
+void print_error_and_exit(const std::string& message) {
   std::cerr << "ERROR: " << message << std::endl;
   exit(1);
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char* argv[]) {
   // --- 配置 (必须与ffmpeg命令中的参数严格对应) ---
   const float CORE_FREQ = 4000.0f;
   const float CORE_DURATION_MS = 20.0f;
   const float INITIAL_THRESHOLD = 0.03f;
   const float EXPECTED_LATENCY_MS = 50.0f;
-  const char *WAV_FILENAME = "test_latency.wav";
+  const char* WAV_FILENAME = "test_latency.wav";
 
   // argv[1] is file path
   if (argc > 1) {
@@ -42,7 +41,7 @@ int main(int argc, char *argv[]) {
   unsigned int channels;
   unsigned int sampleRate;
   drwav_uint64 totalFrameCount;
-  int16_t *pSampleData = drwav_open_file_and_read_pcm_frames_s16(
+  int16_t* pSampleData = drwav_open_file_and_read_pcm_frames_s16(
       WAV_FILENAME, &channels, &sampleRate, &totalFrameCount, NULL);
 
   if (pSampleData == NULL) {
@@ -64,7 +63,7 @@ int main(int argc, char *argv[]) {
   std::cout << "\nProcessing audio stream..." << std::endl;
 
   const size_t totalSampleCount = totalFrameCount * channels;
-  const int frame_size_interleaved = 480 * channels; // 每次处理 10ms 的数据
+  const int frame_size_interleaved = 480 * channels;  // 每次处理 10ms 的数据
 
   std::vector<int16_t> frame(frame_size_interleaved);
   size_t samples_processed = 0;
@@ -90,7 +89,7 @@ int main(int argc, char *argv[]) {
   latency_detector.SendFrame({});
 
   // --- 4. 清理并报告最终结果 ---
-  drwav_free(pSampleData, NULL); // 释放 dr_wav 分配的内存
+  drwav_free(pSampleData, NULL);  // 释放 dr_wav 分配的内存
 
   std::cout << "\n--- Final Results ---" << std::endl;
   std::cout << "Expected latency was: " << EXPECTED_LATENCY_MS << " ms"

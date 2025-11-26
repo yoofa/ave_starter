@@ -17,8 +17,8 @@
 namespace ave {
 
 class SimpleAudioAsyncRecorder {
-public:
-  SimpleAudioAsyncRecorder(base::TaskRunnerFactory *task_runner_factory,
+ public:
+  SimpleAudioAsyncRecorder(base::TaskRunnerFactory* task_runner_factory,
                            std::shared_ptr<media::AudioDevice> audio_device);
   ~SimpleAudioAsyncRecorder();
 
@@ -28,13 +28,13 @@ public:
   bool Start();
   void Stop();
 
-  size_t Read(const void *data, size_t size);
+  size_t Read(const void* data, size_t size);
 
-private:
+ private:
   std::unique_ptr<base::TaskRunner> task_runner_;
   std::shared_ptr<media::AudioDevice> audio_device_;
   std::shared_ptr<media::AudioRecord> audio_record_;
 };
-} // namespace ave
+}  // namespace ave
 
 #endif /* !AVE_LATENCY_MEASURE_SIMPLE_AUDIO_ASYNC_RECORDER_H_H_ */

@@ -16,22 +16,23 @@
 namespace ave {
 
 class SimpleAudioAsyncPlayer {
-
-public:
-  SimpleAudioAsyncPlayer(base::TaskRunnerFactory *task_runner_factory,
+ public:
+  SimpleAudioAsyncPlayer(base::TaskRunnerFactory* task_runner_factory,
                          std::shared_ptr<media::AudioDevice> audio_device);
   ~SimpleAudioAsyncPlayer();
 
-  void Init(int32_t sample_rate, int channels, int32_t core_signal_freq,
+  void Init(int32_t sample_rate,
+            int channels,
+            int32_t core_signal_freq,
             int32_t core_signal_duration_ms);
   void Release();
 
   void Start();
   void Stop();
 
-private:
+ private:
   void Play();
-  void Write(const uint8_t *data, size_t size);
+  void Write(const uint8_t* data, size_t size);
   std::unique_ptr<base::TaskRunner> task_runner_;
   std::shared_ptr<media::AudioDevice> audio_device_;
   std::shared_ptr<media::AudioTrack> audio_track_;
@@ -39,6 +40,6 @@ private:
   size_t current_position_;
 };
 
-} // namespace ave
+}  // namespace ave
 
 #endif /* !AVE_LATENCY_MEASURE_SIMPLE_AUDIO_ASYNC_PLAYER_H_H_ */
