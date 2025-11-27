@@ -20,8 +20,8 @@
 namespace ave {
 
 constexpr int32_t kDefaultCoreSignalFreqHz = 4000;
-constexpr int32_t kDefaultCoreSignalDurationMs = 30;
-constexpr float kDefaultPeakThreshold = 0.05f;
+constexpr int32_t kDefaultCoreSignalDurationMs = 20;
+constexpr float kDefaultPeakThreshold = 0.3f;
 constexpr int32_t kRecordPlaybackSampleRate = 48000;
 constexpr int32_t kRecordPlaybackChannelCount = 2;
 

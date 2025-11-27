@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
     // Create and initialize the measurer
     ave::Measurer measurer(
         ave::kDefaultCoreSignalFreqHz,      // 4000 Hz test signal
-        ave::kDefaultCoreSignalDurationMs,  // 30ms duration
-        ave::kDefaultPeakThreshold          // 0.05 threshold
+        ave::kDefaultCoreSignalDurationMs,  // 10ms duration
+        ave::kDefaultPeakThreshold          // 0.3 threshold
     );
 
     std::cout << "Initializing audio system..." << std::endl;
@@ -49,6 +49,8 @@ int main(int argc, char* argv[]) {
     int last_latency = -1;
     while (ave::g_running) {
       int current_latency = measurer.GetLatencyMs();
+      // std::cout << "Current latency: " << current_latency << " ms"
+      //           << std::endl;
 
       if (current_latency != last_latency && current_latency >= 0) {
         std::cout << "Measured latency: " << current_latency << " ms"

@@ -70,8 +70,8 @@ void AsyncLatencyMeasure::SendFrame(const std::vector<int16_t>& frame) {
 }
 
 void AsyncLatencyMeasure::ProcessBufferAsync() {
-  std::cout << "[AsyncLatencyMeasure] Processing buffer asynchronously"
-            << std::endl;
+  // std::cout << "[AsyncLatencyMeasure] Processing buffer asynchronously"
+  //           << std::endl;
   if (!running_.load()) {
     return;
   }

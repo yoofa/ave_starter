@@ -67,7 +67,11 @@ class LatencyMeasure {
 
   // ---------- 波峰检测 ----------
   std::atomic<float> peak_threshold_;  // NEW: 使用 atomic 以确保线程安全
-  std::vector<long long> peak_positions_;
+  struct PeakInfo {
+    long long pos;
+    float val;
+  };
+  std::vector<PeakInfo> peak_positions_;
 
   // ---------- 延迟结果 ----------
   float last_latency_ms_;
