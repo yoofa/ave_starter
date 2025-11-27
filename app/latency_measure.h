@@ -11,10 +11,14 @@
 
 #include <atomic>  // 用于线程安全的阈值
 #include <cstddef>
+#include <functional>
 #include <vector>
 
 class LatencyMeasure {
  public:
+  using OnDataCallback = std::function<void(const std::vector<float>&)>;
+  using OnLatencyUpdateCallback = std::function<void(float)>;
+
   /**
    * @brief 构造函数 (已更新)
    * @param core_signal_freq 测试信号的核心频率 (Hz)，例如 4000.0f
@@ -22,12 +26,16 @@ class LatencyMeasure {
    * @param record_sample_rate 录音设备的采样率 (Hz)，例如 48000
    * @param record_channel_count 录音设备的通道数，例如 1 (单声道) 或 2 (立体声)
    * @param initial_peak_threshold 初始的波峰检测阈值 (0.0 到 1.0)
+   * @param on_data_callback 音频数据回调
+   * @param on_latency_update_callback 延迟更新回调
    */
   LatencyMeasure(float core_signal_freq,
                  float core_signal_duration_ms,
                  int record_sample_rate,
                  int record_channel_count,
-                 float initial_peak_threshold);
+                 float initial_peak_threshold,
+                 OnDataCallback on_data_callback = nullptr,
+                 OnLatencyUpdateCallback on_latency_update_callback = nullptr);
 
   /**
    * @brief 接收并处理一帧音频数据。支持多通道，数据格式为交错排列
@@ -75,6 +83,10 @@ class LatencyMeasure {
 
   // ---------- 延迟结果 ----------
   float last_latency_ms_;
+
+  // ---------- 回调 ----------
+  OnDataCallback on_data_callback_;
+  OnLatencyUpdateCallback on_latency_update_callback_;
 
   // ---------- 私有方法 ----------
   void DesignBandpassFilter();

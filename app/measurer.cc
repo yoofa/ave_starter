@@ -1,5 +1,5 @@
 /*
- * measurer.cc
+ * measure.cc
  * Copyright (C) 2025 youfa <vsyfar@gmail.com>
  *
  * Distributed under terms of the GPLv2 license.
@@ -11,7 +11,8 @@
 
 namespace ave {
 
-Measurer::Measurer(int32_t core_signal_freq_hz,
+Measurer::Measurer(Callback* callback,
+                   int32_t core_signal_freq_hz,
                    int32_t core_signal_duration_ms,
                    float peak_threshold)
     : task_runner_factory_(base::CreateDefaultTaskRunnerFactory()),
@@ -28,20 +29,30 @@ Measurer::Measurer(int32_t core_signal_freq_hz,
                                                      audio_device_)),
       core_signal_freq_hz_(core_signal_freq_hz),
       core_signal_duration_ms_(core_signal_duration_ms),
-      peak_threshold_(peak_threshold) {
-  task_runner_->PostTaskAndWait(
-      [this, core_signal_duration_ms]() {
-        audio_device_->Init();
+      peak_threshold_(peak_threshold),
+      callback_(callback) {
+  task_runner_->PostTaskAndWait([this, core_signal_duration_ms]() {
+    audio_device_->Init();
 
-        latency_measure_ = std::make_unique<AsyncLatencyMeasure>(
-            task_runner_factory_.get(), core_signal_freq_hz_,
-            core_signal_duration_ms, kRecordPlaybackSampleRate,
-            kRecordPlaybackChannelCount, peak_threshold_);
+    latency_measure_ = std::make_unique<AsyncLatencyMeasure>(
+        task_runner_factory_.get(), core_signal_freq_hz_,
+        core_signal_duration_ms, kRecordPlaybackSampleRate,
+        kRecordPlaybackChannelCount, peak_threshold_,
+        [this](const std::vector<float>& data) {
+          if (callback_) {
+            callback_->OnData(data);
+          }
+        },
+        [this](float latency) {
+          if (callback_) {
+            callback_->OnLatencyUpdate(latency);
+          }
+        });
 
-        player_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount,
-                      core_signal_freq_hz_, core_signal_duration_ms_);
-        recorder_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount);
-      });
+    player_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount,
+                  core_signal_freq_hz_, core_signal_duration_ms_);
+    recorder_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount);
+  });
 }
 
 Measurer::~Measurer() {}
@@ -79,7 +90,7 @@ void Measurer::StartRecorder() {
     }
 
     // Start the measurement loop
-    task_runner_->PostTask([this]() { ReadDataAndMeasure(); });
+    task_runner_->PostTask([this]() { ReadDataAndMeasurer(); });
   });
 }
 
@@ -105,7 +116,7 @@ void Measurer::StopRecorder() {
 }
 
 // read 10ms data each time, and send it to latency_measure_
-void Measurer::ReadDataAndMeasure() {
+void Measurer::ReadDataAndMeasurer() {
   if (!latency_measure_ || !is_recording_) {
     return;
   }
@@ -136,7 +147,7 @@ void Measurer::ReadDataAndMeasure() {
   }
 
   // Schedule next measurement cycle (every 10ms)
-  task_runner_->PostDelayedTask([this]() { ReadDataAndMeasure(); },
+  task_runner_->PostDelayedTask([this]() { ReadDataAndMeasurer(); },
                                 kReadChunkMs);
 }
 

@@ -10,6 +10,7 @@
 #define AVE_LATENCY_MEASURE_ASYNC_LATENCY_MEASURE_H_H_
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -27,6 +28,9 @@ namespace ave {
  */
 class AsyncLatencyMeasure {
  public:
+  using OnDataCallback = std::function<void(const std::vector<float>&)>;
+  using OnLatencyUpdateCallback = std::function<void(float)>;
+
   /**
    * @brief 构造函数
    * @param task_runner_factory 任务运行器工厂
@@ -35,13 +39,18 @@ class AsyncLatencyMeasure {
    * @param record_sample_rate 录音设备的采样率 (Hz)
    * @param record_channel_count 录音设备的通道数
    * @param initial_peak_threshold 初始的波峰检测阈值
+   * @param on_data_callback 音频数据回调
+   * @param on_latency_update_callback 延迟更新回调
    */
-  AsyncLatencyMeasure(ave::base::TaskRunnerFactory* task_runner_factory,
-                      float core_signal_freq,
-                      float core_signal_duration_ms,
-                      int record_sample_rate,
-                      int record_channel_count,
-                      float initial_peak_threshold);
+  AsyncLatencyMeasure(
+      ave::base::TaskRunnerFactory* task_runner_factory,
+      float core_signal_freq,
+      float core_signal_duration_ms,
+      int record_sample_rate,
+      int record_channel_count,
+      float initial_peak_threshold,
+      OnDataCallback on_data_callback = nullptr,
+      OnLatencyUpdateCallback on_latency_update_callback = nullptr);
 
   /**
    * @brief 析构函数
@@ -92,6 +101,9 @@ class AsyncLatencyMeasure {
   // 音频数据缓冲区（用于异步处理）
   std::vector<int16_t> audio_buffer_;
   std::atomic<size_t> buffer_size_;
+
+  OnDataCallback on_data_callback_;
+  OnLatencyUpdateCallback on_latency_update_callback_;
 };
 
 }  // namespace ave

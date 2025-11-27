@@ -17,7 +17,9 @@ AsyncLatencyMeasure::AsyncLatencyMeasure(
     float core_signal_duration_ms,
     int record_sample_rate,
     int record_channel_count,
-    float initial_peak_threshold)
+    float initial_peak_threshold,
+    OnDataCallback on_data_callback,
+    OnLatencyUpdateCallback on_latency_update_callback)
     : task_runner_(std::make_unique<ave::base::TaskRunner>(
           task_runner_factory->CreateTaskRunner(
               "AsyncLatencyMeasure",
@@ -28,8 +30,12 @@ AsyncLatencyMeasure::AsyncLatencyMeasure(
                                            core_signal_duration_ms,
                                            record_sample_rate,
                                            record_channel_count,
-                                           initial_peak_threshold)),
-      buffer_size_(0) {
+                                           initial_peak_threshold,
+                                           on_data_callback,
+                                           on_latency_update_callback)),
+      buffer_size_(0),
+      on_data_callback_(on_data_callback),
+      on_latency_update_callback_(on_latency_update_callback) {
   // 预分配缓冲区
   audio_buffer_.reserve(record_sample_rate * 2);  // 2秒的缓冲区
 }

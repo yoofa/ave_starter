@@ -7,8 +7,10 @@
 
 #include <signal.h>
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <thread>
+#include <vector>
 
 #include "measurer.h"
 
@@ -34,30 +36,43 @@ int main(int argc, char* argv[]) {
   std::cout << "=== Audio Latency Measurement System ===" << std::endl;
   std::cout << "Press Ctrl+C to stop" << std::endl;
 
+  class MainCallback : public ave::Measurer::Callback {
+   public:
+    void OnData(const std::vector<float>& data) override {
+      if (data.empty())
+        return;
+      float sum_sq = 0.0f;
+      for (float s : data)
+        sum_sq += s * s;
+      float rms = std::sqrt(sum_sq / data.size());
+      static int32_t print_count = 0;
+      print_count++;
+      if (print_count % 40 == 0)  // Print every 50 calls
+      {
+        std::cout << "[Callback] OnData RMS: " << rms << std::endl;
+      }
+    }
+
+    void OnLatencyUpdate(const float latency) override {
+      std::cout << "[Callback] OnLatencyUpdate: " << latency << " ms"
+                << std::endl;
+    }
+  };
+
   try {
+    MainCallback callback;
     // Create and initialize the measurer
     ave::Measurer measurer(
+        &callback,
         ave::kDefaultCoreSignalFreqHz,      // 4000 Hz test signal
         ave::kDefaultCoreSignalDurationMs,  // 10ms duration
-        ave::kDefaultPeakThreshold          // 0.3 threshold
-    );
+        ave::kDefaultPeakThreshold);        // 0.3 threshold
 
     std::cout << "Initializing audio system..." << std::endl;
     measurer.Start();
 
     // Main loop - continuously check for latency updates
-    int last_latency = -1;
     while (ave::g_running) {
-      int current_latency = measurer.GetLatencyMs();
-      // std::cout << "Current latency: " << current_latency << " ms"
-      //           << std::endl;
-
-      if (current_latency != last_latency && current_latency >= 0) {
-        std::cout << "Measured latency: " << current_latency << " ms"
-                  << std::endl;
-        last_latency = current_latency;
-      }
-
       // Check every 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

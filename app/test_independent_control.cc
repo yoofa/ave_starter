@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   std::cout << "=== Independent Control Test ===" << std::endl;
 
   try {
-    ave::Measurer measurer;
+    ave::Measurer measurer(nullptr);
 
     std::cout << "Initializing..." << std::endl;
     // Initialization is now synchronous in the constructor.

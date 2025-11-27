@@ -6,6 +6,7 @@
  */
 
 // main2.cpp
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <vector>
@@ -56,8 +57,22 @@ int main(int argc, char* argv[]) {
             << (float)totalFrameCount / sampleRate << " seconds)" << std::endl;
 
   // --- 2. 初始化延迟检测器 ---
-  LatencyMeasure latency_detector(CORE_FREQ, CORE_DURATION_MS, sampleRate,
-                                  channels, INITIAL_THRESHOLD);
+  // --- 2. 初始化延迟检测器 ---
+  LatencyMeasure latency_detector(
+      CORE_FREQ, CORE_DURATION_MS, sampleRate, channels, INITIAL_THRESHOLD,
+      [](const std::vector<float>& data) {
+        if (data.empty())
+          return;
+        float sum_sq = 0.0f;
+        for (float s : data)
+          sum_sq += s * s;
+        float rms = std::sqrt(sum_sq / data.size());
+        std::cout << "[Callback] OnData RMS: " << rms << std::endl;
+      },
+      [](float latency) {
+        std::cout << "[Callback] OnLatencyUpdate: " << latency << " ms"
+                  << std::endl;
+      });
 
   // --- 3. 模拟实时流，分块处理音频数据 ---
   std::cout << "\nProcessing audio stream..." << std::endl;

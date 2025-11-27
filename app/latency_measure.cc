@@ -16,14 +16,18 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-LatencyMeasure::LatencyMeasure(float core_signal_freq,
-                               float core_signal_duration_ms,
-                               int record_sample_rate,
-                               int record_channel_count,
-                               float initial_peak_threshold)
+LatencyMeasure::LatencyMeasure(
+    float core_signal_freq,
+    float core_signal_duration_ms,
+    int record_sample_rate,
+    int record_channel_count,
+    float initial_peak_threshold,
+    OnDataCallback on_data_callback,
+    OnLatencyUpdateCallback on_latency_update_callback)
     : core_signal_freq_(core_signal_freq),
       record_sample_rate_(record_sample_rate),
       record_channel_count_(record_channel_count),
+      min_peak_distance_(0),
       total_samples_processed_(0),
       // 滤波器状态初始化
       bpf_b0(0.0f),
@@ -35,7 +39,9 @@ LatencyMeasure::LatencyMeasure(float core_signal_freq,
       lpf_alpha_(0.0f),
       lpf_y1_(0.0f),
       peak_threshold_(initial_peak_threshold),  // 初始化 atomic 变量
-      last_latency_ms_(-1.0f) {
+      last_latency_ms_(-1.0f),
+      on_data_callback_(on_data_callback),
+      on_latency_update_callback_(on_latency_update_callback) {
   if (record_channel_count_ <= 0) {
     // 防止除以零或其他无效通道数
     record_channel_count_ = 1;
@@ -65,22 +71,33 @@ void LatencyMeasure::SetPeakThreshold(float new_threshold) {
 }
 
 void LatencyMeasure::DownmixAndAppend(const std::vector<int16_t>& frame) {
+  std::vector<float> new_samples;
   if (record_channel_count_ == 1) {
     // 单声道，直接添加并归一化
+    new_samples.reserve(frame.size());
     for (int16_t sample : frame) {
-      audio_buffer_.push_back(sample / 32768.0f);
+      float val = sample / 32768.0f;
+      audio_buffer_.push_back(val);
+      new_samples.push_back(val);
     }
   } else {
     // 多通道，进行缩混 (取平均值) 并归一化
     size_t num_samples = frame.size() / record_channel_count_;
     audio_buffer_.reserve(audio_buffer_.size() + num_samples);
+    new_samples.reserve(num_samples);
     for (size_t i = 0; i < frame.size(); i += record_channel_count_) {
       float mono_sample = 0.0f;
       for (int ch = 0; ch < record_channel_count_; ++ch) {
         mono_sample += frame[i + ch];
       }
-      audio_buffer_.push_back((mono_sample / record_channel_count_) / 32768.0f);
+      float val = (mono_sample / record_channel_count_) / 32768.0f;
+      audio_buffer_.push_back(val);
+      new_samples.push_back(val);
     }
+  }
+
+  if (on_data_callback_) {
+    on_data_callback_(new_samples);
   }
 }
 
@@ -281,6 +298,9 @@ void LatencyMeasure::ProcessBuffer() {
       std::cout << "[SUCCESS] Latency detected: " << last_latency_ms_
                 << " ms. (Peaks at " << peak_positions_[0].pos << " and "
                 << peak_positions_[1].pos << ")" << std::endl;
+      if (on_latency_update_callback_) {
+        on_latency_update_callback_(last_latency_ms_);
+      }
     }
     peak_positions_.erase(peak_positions_.begin(), peak_positions_.begin() + 2);
   }

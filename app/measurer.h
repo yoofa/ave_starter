@@ -1,13 +1,16 @@
 /*
- * measurer.h
+ * measure.h
  * Copyright (C) 2025 youfa <vsyfar@gmail.com>
  *
  * Distributed under terms of the GPLv2 license.
  */
 
-#ifndef AVE_LATENCY_MEASURE_MEASURE_H_H_
-#define AVE_LATENCY_MEASURE_MEASURE_H_H_
+#ifndef AVE_LATENCY_MEASURE_MEASURE_H_
+#define AVE_LATENCY_MEASURE_MEASURE_H_
+
+#include <functional>
 #include <memory>
+#include <vector>
 
 #include "base/task_util/default_task_runner_factory.h"
 #include "base/task_util/task_runner_factory.h"
@@ -27,12 +30,16 @@ constexpr int32_t kRecordPlaybackChannelCount = 2;
 
 class Measurer {
  public:
+
   class Callback {
-    void OnData(const void* data, size_t size) {}
-    void OnLatencyUpdate(int32_t latency_ms) {}
+   public:
+    virtual ~Callback() = default;
+    virtual void OnData(const std::vector<float>& data) = 0;
+    virtual void OnLatencyUpdate(const float latency_ms) = 0;
   };
 
-  Measurer(int32_t core_signal_freq_hz = kDefaultCoreSignalFreqHz,
+  Measurer(Callback* callback,
+           int32_t core_signal_freq_hz = kDefaultCoreSignalFreqHz,
            int32_t core_signal_duration_ms = kDefaultCoreSignalDurationMs,
            float peak_threshold = kDefaultPeakThreshold);
   ~Measurer();
@@ -53,7 +60,7 @@ class Measurer {
   int32_t GetLatencyMs();
 
  private:
-  void ReadDataAndMeasure();  // run in task runner thread
+  void ReadDataAndMeasurer();  // run in task runner thread
 
   std::unique_ptr<base::TaskRunnerFactory> task_runner_factory_;
   std::shared_ptr<base::TaskRunner> task_runner_;
@@ -67,8 +74,10 @@ class Measurer {
   int32_t peak_threshold_;
   std::unique_ptr<AsyncLatencyMeasure> latency_measure_;
   bool is_recording_ = false;
+
+  Callback* callback_;
 };
 
 }  // namespace ave
 
-#endif /* !AVE_LATENCY_MEASURE_MEASURE_H_H_ */
+#endif /* !AVE_LATENCY_MEASURE_MEASURE_H_ */

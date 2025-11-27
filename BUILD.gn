@@ -4,6 +4,7 @@ group("default") {
   testonly = true
   deps = [ ":project" ]
   deps += [ "//base/tracing" ]
+  deps += [ "//sdk/android" ]
 
   #  deps += [ "examples" ]
   if (ave_include_test) {
