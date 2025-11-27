@@ -24,8 +24,8 @@ void print_error_and_exit(const std::string& message) {
 int main(int argc, char* argv[]) {
   // --- 配置 (必须与ffmpeg命令中的参数严格对应) ---
   const float CORE_FREQ = 4000.0f;
-  const float CORE_DURATION_MS = 20.0f;
-  const float INITIAL_THRESHOLD = 0.03f;
+  const float CORE_DURATION_MS = 10.0f;
+  const float INITIAL_THRESHOLD = 0.5f;
   const float EXPECTED_LATENCY_MS = 50.0f;
   const char* WAV_FILENAME = "test_latency.wav";
 

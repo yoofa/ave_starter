@@ -61,7 +61,7 @@ class LatencyMeasure {
 
   // ---------- 滤波器和状态 ----------
   float bpf_b0, bpf_b1, bpf_b2, bpf_a1, bpf_a2;
-  float bpf_x1, bpf_x2, bpf_y1, bpf_y2;
+  float bpf_x1, bpf_x2;
   float lpf_alpha_;
   float lpf_y1_;
 

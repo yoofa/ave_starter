@@ -32,8 +32,6 @@ LatencyMeasure::LatencyMeasure(float core_signal_freq,
       bpf_a1(0.0f),
       bpf_x1(0.0f),
       bpf_x2(0.0f),
-      bpf_y1(0.0f),
-      bpf_y2(0.0f),
       lpf_alpha_(0.0f),
       lpf_y1_(0.0f),
       peak_threshold_(initial_peak_threshold),  // 初始化 atomic 变量
@@ -87,10 +85,8 @@ void LatencyMeasure::DownmixAndAppend(const std::vector<int16_t>& frame) {
 // CHANGED: sendFrame 现在调用 downmixAndAppend
 void LatencyMeasure::SendFrame(const std::vector<int16_t>& frame) {
   // dump frame to file
-  std::cout << "[Info] Received frame with " << frame.size() << " samples."
-            << std::endl;
-  DownmixAndAppend(frame);
 
+  DownmixAndAppend(frame);
   // 触发处理的逻辑保持不变
   if (audio_buffer_.size() > static_cast<size_t>(record_sample_rate_)) {
     ProcessBuffer();

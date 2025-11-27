@@ -30,7 +30,7 @@ Measurer::Measurer(int32_t core_signal_freq_hz,
       core_signal_duration_ms_(core_signal_duration_ms),
       peak_threshold_(peak_threshold) {
   task_runner_->PostTaskAndWait(
-      [this, core_signal_freq_hz, core_signal_duration_ms, peak_threshold]() {
+      [this, core_signal_duration_ms]() {
         audio_device_->Init();
 
         latency_measure_ = std::make_unique<AsyncLatencyMeasure>(

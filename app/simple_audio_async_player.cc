@@ -188,15 +188,15 @@ void SimpleAudioAsyncPlayer::Play() {
   task_runner_->PostDelayedTask([this]() { Play(); }, kWriteChunkSizeMs);
 }
 
-void SimpleAudioAsyncPlayer::Write(const uint8_t* data, size_t size) {
-  // Copy data to avoid issues with the original buffer being modified
-  std::vector<uint8_t> buffer(data, data + size);
-  task_runner_->PostTask([this, buffer = std::move(buffer)]() {
-    // Write audio data to the player here
-    if (audio_track_ && audio_track_->ready()) {
-      audio_track_->Write(buffer.data(), buffer.size(), false);
-    }
-  });
-}
+// void SimpleAudioAsyncPlayer::Write(const uint8_t* data, size_t size) {
+//   // Copy data to avoid issues with the original buffer being modified
+//   std::vector<uint8_t> buffer(data, data + size);
+//   task_runner_->PostTask([this, buffer = std::move(buffer)]() {
+//     // Write audio data to the player here
+//     if (audio_track_ && audio_track_->ready()) {
+//       audio_track_->Write(buffer.data(), buffer.size(), false);
+//     }
+//   });
+// }
 
 }  // namespace ave

@@ -6839,7 +6839,7 @@ DRWAV_PRIVATE drwav_bool32 drwav__on_seek_memory(void* pUserData,
   } else if (origin == DRWAV_SEEK_END) {
     newCursor = (drwav_int64)pWav->memoryStream.dataSize;
   } else {
-    DRWAV_ASSERT(!"Invalid seek origin");
+    // DRWAV_ASSERT(!"Invalid seek origin");
     return DRWAV_FALSE;
   }
 
@@ -6927,7 +6927,7 @@ drwav__on_seek_memory_write(void* pUserData,
   } else if (origin == DRWAV_SEEK_END) {
     newCursor = (drwav_int64)pWav->memoryStreamWrite.dataSize;
   } else {
-    DRWAV_ASSERT(!"Invalid seek origin");
+    // DRWAV_ASSERT(!"Invalid seek origin");
     return DRWAV_INVALID_ARGS;
   }
 

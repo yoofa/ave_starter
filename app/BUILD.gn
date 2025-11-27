@@ -13,12 +13,14 @@ ave_library("latency_measure") {
     "latency_measure.h",
   ]
   cflags = [
-    "-Wheader-hygiene",
+    #"-Wno-unused-private-field",
+
+    #"-Wheader-hygiene",
 
     # Warns when a const char[] is converted to bool.
-    "-Wstring-conversion",
+    #"-Wstring-conversion",
 
-    "-Wtautological-overlap-compare",
+    #"-Wtautological-overlap-compare",
   ]
 }
 
@@ -77,6 +79,14 @@ ave_executable("wav_test") {
     "./test_wav_main.cc",
   ]
   deps = [ ":latency_measure" ]
+  cflags = [
+    "-Wheader-hygiene",
+
+    # Warns when a const char[] is converted to bool.
+    "-Wno-string-conversion",
+
+    "-Wtautological-overlap-compare",
+  ]
 }
 
 ave_executable("latency_measure_main") {

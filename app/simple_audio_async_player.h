@@ -32,7 +32,7 @@ class SimpleAudioAsyncPlayer {
 
  private:
   void Play();
-  void Write(const uint8_t* data, size_t size);
+  // void Write(const uint8_t* data, size_t size);
   std::unique_ptr<base::TaskRunner> task_runner_;
   std::shared_ptr<media::AudioDevice> audio_device_;
   std::shared_ptr<media::AudioTrack> audio_track_;
