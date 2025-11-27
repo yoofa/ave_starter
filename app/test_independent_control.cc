@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
     ave::Measurer measurer;
 
     std::cout << "Initializing..." << std::endl;
-    measurer.Init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // Initialization is now synchronous in the constructor.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // 1. Start Player Only
     std::cout << "[Step 1] Starting Player Only (Signal should be audible, but "

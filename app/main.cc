@@ -43,12 +43,6 @@ int main(int argc, char* argv[]) {
     );
 
     std::cout << "Initializing audio system..." << std::endl;
-    measurer.Init();
-
-    // Wait a bit for initialization
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    std::cout << "Starting measurement..." << std::endl;
     measurer.Start();
 
     // Main loop - continuously check for latency updates

@@ -37,9 +37,6 @@ class Measurer {
            float peak_threshold = kDefaultPeakThreshold);
   ~Measurer();
 
-  void Init(int32_t core_signal_freq_hz = kDefaultCoreSignalFreqHz,
-            int32_t core_signal_duration_ms = kDefaultCoreSignalDurationMs,
-            float peak_threshold = kDefaultPeakThreshold);
   void Release();
   void Start();
   void Stop();

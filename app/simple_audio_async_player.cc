@@ -185,7 +185,7 @@ void SimpleAudioAsyncPlayer::Play() {
   }
 
   // Schedule next play cycle
-  task_runner_->PostTask([this]() { Play(); });
+  task_runner_->PostDelayedTask([this]() { Play(); }, kWriteChunkSizeMs);
 }
 
 void SimpleAudioAsyncPlayer::Write(const uint8_t* data, size_t size) {

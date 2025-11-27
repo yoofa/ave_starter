@@ -28,27 +28,10 @@ Measurer::Measurer(int32_t core_signal_freq_hz,
                                                      audio_device_)),
       core_signal_freq_hz_(core_signal_freq_hz),
       core_signal_duration_ms_(core_signal_duration_ms),
-      peak_threshold_(peak_threshold),
-      latency_measure_(
-          std::make_unique<AsyncLatencyMeasure>(task_runner_factory_.get(),
-                                                core_signal_freq_hz_,
-                                                core_signal_duration_ms,
-                                                kRecordPlaybackSampleRate,
-                                                kRecordPlaybackChannelCount,
-                                                peak_threshold_)) {
-  audio_device_->Init();
-}
-
-Measurer::~Measurer() {}
-
-void Measurer::Init(int32_t core_signal_freq_hz,
-                    int32_t core_signal_duration_ms,
-                    float peak_threshold) {
-  task_runner_->PostTask(
+      peak_threshold_(peak_threshold) {
+  task_runner_->PostTaskAndWait(
       [this, core_signal_freq_hz, core_signal_duration_ms, peak_threshold]() {
-        core_signal_freq_hz_ = core_signal_freq_hz;
-        core_signal_duration_ms_ = core_signal_duration_ms;
-        peak_threshold_ = peak_threshold;
+        audio_device_->Init();
 
         latency_measure_ = std::make_unique<AsyncLatencyMeasure>(
             task_runner_factory_.get(), core_signal_freq_hz_,
@@ -60,6 +43,8 @@ void Measurer::Init(int32_t core_signal_freq_hz,
         recorder_->Init(kRecordPlaybackSampleRate, kRecordPlaybackChannelCount);
       });
 }
+
+Measurer::~Measurer() {}
 
 void Measurer::Release() {
   task_runner_->PostTaskAndWait([this]() {
@@ -151,7 +136,8 @@ void Measurer::ReadDataAndMeasure() {
   }
 
   // Schedule next measurement cycle (every 10ms)
-  task_runner_->PostDelayedTask([this]() { ReadDataAndMeasure(); }, 5000);
+  task_runner_->PostDelayedTask([this]() { ReadDataAndMeasure(); },
+                                kReadChunkMs);
 }
 
 void Measurer::SetPeakThreshold(float new_threshold) {
